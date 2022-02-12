@@ -8,34 +8,41 @@ const Home = React.lazy(() => import("./pages/Home"));
 const About = React.lazy(() => import("./pages/About"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const LoginForm = React.lazy(() => import("./pages/LoginForm"));
+const RegisterForm = React.lazy(() => import("./pages/RegisterForm"));
 
-const userMockArray = [
-  {email: 'alumno@upgrade.com', password: '12345', name: 'Alumno'},
-  {email: 'mario@upgrade.com', password: '123456', name: 'Mario'},
-  {email: 'alberto@upgrade.com', password: '13245', name: 'Alberto'},
-]
+const sessionUser = sessionStorage.getItem('user');
 
 function App() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(sessionUser ? JSON.parse(sessionUser) : null);
   const [loginError, setLoginError] = useState('');
 
 
-  const loginUser = (formData, prevRoute) => {
-    const existsUser = userMockArray.find(el => el.password === formData.password && el.email === formData.email);
+  const loginUser = async (formData, prevRoute) => {
+    try {
+      const request = await fetch('http://localhost:4000/users');
+      const response = await request.json();
 
-    if (existsUser) {
-      setUser(existsUser);
-      setLoginError('');
-      navigate(prevRoute || '/');
-    } else {
-      setUser(false);
-      setLoginError('No existe el usuario o la contraseña no coincide');
+      const existsUser = response.find(el => el.password === formData.password && el.email === formData.email);
+
+      if (existsUser) {
+        setUser(existsUser);
+        delete existsUser.password;
+        sessionStorage.setItem('user', JSON.stringify(existsUser));
+        setLoginError('');
+        navigate(prevRoute || '/');
+      } else {
+        setUser(false);
+        setLoginError('No existe el usuario o la contraseña no coincide');
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const logoutUser = () => {
     setUser(null);
+    sessionStorage.removeItem('user');
   };
 
   return (
@@ -52,9 +59,14 @@ function App() {
         </Link>
         {user ?
           <button onClick={logoutUser}>Logout</button> :
-          <Link to="/login">
-            <button>Login</button>
-          </Link>
+          <>
+            <Link to="/login">
+              <button>Login</button>
+            </Link>
+            <Link to="/register">
+              <button>Register</button>
+            </Link>
+          </>
         }
       </header>
       <main>
@@ -92,6 +104,14 @@ function App() {
             element={
               <React.Suspense fallback={<>...</>}>
                 <LoginForm loginUser={loginUser} loginError={loginError} />
+              </React.Suspense>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <React.Suspense fallback={<>...</>}>
+                <RegisterForm />
               </React.Suspense>
             }
           />

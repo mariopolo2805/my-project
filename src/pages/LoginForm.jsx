@@ -24,23 +24,27 @@ const LoginForm = (props) => {
 
 
   return (
-    <form onSubmit={submitForm}>
-      <label>
-        <p>Email</p>
-        <input type="text" name="email" onChange={changeInput} value={formData.email} />
-      </label>
+    <>
+      <form onSubmit={submitForm}>
+        <label>
+          <p>Email</p>
+          <input type="text" name="email" onChange={changeInput} value={formData.email} />
+        </label>
 
-      <label>
-        <p>Contraseña</p>
-        <input type="password" name="password" onChange={changeInput} value={formData.password} />
-      </label>
+        <label>
+          <p>Contraseña</p>
+          <input type="password" name="password" onChange={changeInput} value={formData.password} />
+        </label>
 
-      <div>
-        <button type='submit'>Log In</button>
-      </div>
+        <div className="mt-16">
+          <button type='submit'>Log In</button>
+        </div>
 
-      {props.loginError && <div style={{color: 'red'}}>{props.loginError}</div>}
-    </form>
+      </form>
+      <p>
+        {props.loginError && <div style={{color: 'red'}}>{props.loginError}</div>}
+      </p>
+    </>
   );
 }
 
